@@ -1,47 +1,36 @@
 package pl.jch.test.other;
 
-import java.util.Map;
-
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Value;
-import org.apache.commons.lang3.StringUtils;
 
 public class ParseUrl {
+
     public static void main(String[] args) {
-        new ParseUrl().parsePath(new HttpRequest("/cars/v1/api/cars"));
+        new ParseUrl().parsePath(new HttpRequest("/bikes/api/v1/cars/ueothueo/stats"));
     }
 
-    private static final UrlElementNode rootNode;
-
-    static {
-        rootNode = UrlElementNode.builder()
-                .pathHandler()
-                .build();
-    }
+    private static final UrlElementNode rootNode = ParseUrlConstructor.readUrlElementNodeTree();
 
     public void parsePath(HttpRequest request) {
-        final String strippedPath = StringUtils.strip(request.getPath(), "/");
+        final String[] pathElements = ParseUrlUtils.getPathElements(request.getPath());
 
-        final String[] pathElements = strippedPath.split("/");
+        UrlElementNode currentNode = rootNode;
+        UrlElementNode nextNode;
+        for (final String pathElement : pathElements) {
+            nextNode = currentNode.getUrlElementNodesByPathElement().get(pathElement);
 
-        UrlElementNode currentNode =
-        for (int i = 0; i < pathElements.length; i++) {
-            final String pathElement = pathElements[i];
+            if (nextNode == null) {
+                nextNode = currentNode.getVariableNode();
+            }
 
+            if (nextNode == null) {
+                throw new RuntimeException("Path not found: " + request.getPath());
+            }
+
+            currentNode = nextNode;
         }
-    }
 
-    @Value
-    @Builder
-    static class UrlElementNode {
-        Map<String, UrlElementNode> urlElementNodesByPathElement;
-        UrlElementNode variableNode;
-        PathHandler pathHandler;
-    }
-
-    static interface PathHandler {
-        void handle(String path);
+        currentNode.getPathHandler().handle(request.getPath());
     }
 
     @Value

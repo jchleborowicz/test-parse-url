@@ -3,7 +3,6 @@
   endpoints:
     - /api/v1/cars
     - /api/v1/cars/{id}
-    - /api/v1/cars/{id}/stats
     - /api/v1/oil
 /abc/bikes.yaml:
   basePath: bikes
@@ -11,3 +10,4 @@
     - /api/v1/bikes
     - /api/v1/bikes/{id}
     - /api/v1/bike-producers
+    - /api/v1/cars/{id}/stats
