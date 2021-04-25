@@ -2,9 +2,6 @@ package pl.jch.test.other;
 
 import java.util.function.Function;
 
-import lombok.AllArgsConstructor;
-import lombok.Value;
-
 public class ParseUrl {
 
     private static final UrlElementNode<OpenApiFileDef> ROOT_URL_ELEMENT_NODE;
@@ -15,11 +12,11 @@ public class ParseUrl {
 
     public static void main(String[] args) {
         final ParseUrl parseUrl = new ParseUrl();
-        parseUrl.parsePath(new HttpRequest("/bikes/api/v1/cars/ueothueo/stats"));
+        parseUrl.parsePath("/bikes/api/v1/cars/ueothueo/stats");
     }
 
-    public void parsePath(HttpRequest request) {
-        final String[] pathElements = ParseUrlUtils.getPathElements(request.getPath());
+    public void parsePath(String path) {
+        final String[] pathElements = ParseUrlUtils.getPathElements(path);
 
         UrlElementNode<OpenApiFileDef> currentNode = ROOT_URL_ELEMENT_NODE;
         UrlElementNode<OpenApiFileDef> nextNode;
@@ -31,19 +28,14 @@ public class ParseUrl {
             }
 
             if (nextNode == null) {
-                throw new RuntimeException("Path not found: " + request.getPath());
+                throw new RuntimeException("Path not found: " + path);
             }
 
             currentNode = nextNode;
         }
 
         System.out.println(
-                "Handling path " + request.getPath() + " from file " + currentNode.getPathHandler().getFileName());
+                "Handling path " + path + " from file " + currentNode.getPathHandler().getFileName());
     }
 
-    @Value
-    @AllArgsConstructor
-    static class HttpRequest {
-        String path;
-    }
 }
