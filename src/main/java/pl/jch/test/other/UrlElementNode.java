@@ -7,8 +7,8 @@ import lombok.Value;
 
 @Value
 @Builder
-class UrlElementNode {
-    Map<String, UrlElementNode> urlElementNodesByPathElement;
-    UrlElementNode variableNode;
-    PathHandler pathHandler;
+class UrlElementNode<T> {
+    Map<String, UrlElementNode<T>> urlElementNodesByPathElement;
+    UrlElementNode<T> variableNode;
+    T pathHandler;
 }

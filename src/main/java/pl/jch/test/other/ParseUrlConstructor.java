@@ -8,12 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import lombok.Builder;
 import lombok.Data;
-import lombok.Value;
 
 import static java.util.stream.Collectors.toList;
 
@@ -21,7 +20,8 @@ public class ParseUrlConstructor {
 
     private static final String URL_DEFS_YAML_FILE = "/url-defs.yaml";
 
-    public static UrlElementNode readUrlElementNodeTree() {
+    public static <T> UrlElementNode<T> readUrlElementNodeTree(Function<OpenApiFileDef, T> urlHandlerFunction) {
+
         final List<OpenApiFileDef> openApiFileDefs = readInputData();
 
         final TempUrlElementNode tempRootNode = new TempUrlElementNode();
@@ -29,7 +29,7 @@ public class ParseUrlConstructor {
             addOpenApiFileDef(tempRootNode, openApiFileDef);
         }
 
-        return toUrlNode(tempRootNode);
+        return toUrlNode(tempRootNode, urlHandlerFunction);
     }
 
     @SuppressWarnings("unchecked")
@@ -60,23 +60,23 @@ public class ParseUrlConstructor {
                 .collect(toList());
     }
 
-    private static UrlElementNode toUrlNode(TempUrlElementNode tempRootNode) {
-        final UrlElementNode.UrlElementNodeBuilder builder = UrlElementNode.builder();
+    private static <T> UrlElementNode<T> toUrlNode(TempUrlElementNode tempRootNode,
+                                                   Function<OpenApiFileDef, T> urlHandlerFunction) {
+        final UrlElementNode.UrlElementNodeBuilder<T> builder = UrlElementNode.builder();
 
         if (tempRootNode.getFileDef() != null) {
-            builder.pathHandler(path -> System.out
-                    .println("Handling path " + path + " from file " + tempRootNode.getFileDef().getFileName()));
+            builder.pathHandler(urlHandlerFunction.apply(tempRootNode.getFileDef()));
         }
 
         if (tempRootNode.getVariableNode() != null) {
-            builder.variableNode(toUrlNode(tempRootNode.getVariableNode()));
+            builder.variableNode(toUrlNode(tempRootNode.getVariableNode(), urlHandlerFunction));
         }
 
 
-        final Map<String, UrlElementNode> urlElementNodesByPathElement = new HashMap<>();
+        final Map<String, UrlElementNode<T>> urlElementNodesByPathElement = new HashMap<>();
         if (tempRootNode.getUrlElementNodesByPathElement() != null) {
             tempRootNode.getUrlElementNodesByPathElement().forEach((pathElement, tempUrlElementNode) ->
-                    urlElementNodesByPathElement.put(pathElement, toUrlNode(tempUrlElementNode)));
+                    urlElementNodesByPathElement.put(pathElement, toUrlNode(tempUrlElementNode, urlHandlerFunction)));
         }
         builder.urlElementNodesByPathElement(Collections.unmodifiableMap(urlElementNodesByPathElement));
 
@@ -152,13 +152,5 @@ public class ParseUrlConstructor {
         Map<String, TempUrlElementNode> urlElementNodesByPathElement = new HashMap<>();
         TempUrlElementNode variableNode;
         OpenApiFileDef fileDef;
-    }
-
-    @Value
-    @Builder
-    private static class OpenApiFileDef {
-        String fileName;
-        String basePath;
-        Set<String> endpoints;
     }
 }
