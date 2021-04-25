@@ -5,7 +5,7 @@
     - /api/v1/cars/{id}
     - /api/v1/oil
 /abc/bikes.yaml:
-  basePath: bikes
+  basePath: /bikes/my
   endpoints:
     - /api/v1/bikes
     - /api/v1/bikes/{id}

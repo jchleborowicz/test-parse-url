@@ -13,6 +13,7 @@ import java.util.function.Function;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import static java.util.stream.Collectors.toList;
 
@@ -49,7 +50,7 @@ public class ParseUrlConstructor {
                 .stream()
                 .map(entry -> {
                     final Map<String, Object> value = entry.getValue();
-                    final String basePath = (String) value.get("basePath");
+                    final String basePath = "/" + StringUtils.strip((String) value.get("basePath"), "/ ");
                     final Set<String> endpoints = Set.copyOf((Collection<String>) value.get("endpoints"));
                     return OpenApiFileDef.builder()
                             .fileName(entry.getKey())

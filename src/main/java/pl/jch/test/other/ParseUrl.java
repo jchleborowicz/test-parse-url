@@ -12,7 +12,7 @@ public class ParseUrl {
 
     public static void main(String[] args) {
         final ParseUrl parseUrl = new ParseUrl();
-        parseUrl.parsePath("/bikes/api/v1/cars/ueothueo/stats");
+        parseUrl.parsePath("/bikes/my/api/v1/cars/ueothueo/stats");
     }
 
     public void parsePath(String path) {
@@ -34,8 +34,10 @@ public class ParseUrl {
             currentNode = nextNode;
         }
 
+        final OpenApiFileDef pathHandler = currentNode.getPathHandler();
         System.out.println(
-                "Handling path " + path + " from file " + currentNode.getPathHandler().getFileName());
+                "Handling path " + path + " from file " + pathHandler.getFileName()
+                        + ", base path: " + pathHandler.getBasePath());
     }
 
 }
